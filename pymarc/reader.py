@@ -88,16 +88,20 @@ class MARCReader(Reader):
         if len(first5) < 5:
             raise RecordLengthInvalid
 
-        length = int(first5)
-        chunk = self.file_handle.read(length - 5)
-        chunk = first5 + chunk
-        record = Record(chunk,
-                        to_unicode=self.to_unicode,
-                        force_utf8=self.force_utf8,
-                        hide_utf8_warnings=self.hide_utf8_warnings,
-                        utf8_handling=self.utf8_handling,
-                        ascii_handling=self.ascii_handling)
-        return record
+        try:
+
+            length = int(first5)
+            chunk = self.file_handle.read(length - 5)
+            chunk = first5 + chunk
+            record = Record(chunk,
+                            to_unicode=self.to_unicode,
+                            force_utf8=self.force_utf8,
+                            hide_utf8_warnings=self.hide_utf8_warnings,
+                            utf8_handling=self.utf8_handling,
+                            ascii_handling=self.ascii_handling)
+            return record
+
+        except: pass
 
 def map_records(f, *files):
     """
