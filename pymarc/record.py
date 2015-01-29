@@ -60,7 +60,7 @@ class Record(Iterator):
     """
 
     def __init__(self, data='', to_unicode=True, force_utf8=False,
-        hide_utf8_warnings=False, utf8_handling='strict'):
+        hide_utf8_warnings=False, utf8_handling='strict', ascii_handling='strict'):
         self.leader = (' '*10) + '22' + (' '*8) + '4500'
         self.fields = list()
         self.pos = 0
@@ -69,7 +69,8 @@ class Record(Iterator):
             self.decode_marc(data, to_unicode=to_unicode,
                              force_utf8=force_utf8,
                              hide_utf8_warnings=hide_utf8_warnings,
-                             utf8_handling=utf8_handling)
+                             utf8_handling=utf8_handling,
+                             ascii_handling=ascii_handling)
         elif force_utf8:
             self.leader = self.leader[0:9] + 'a' + self.leader[10:]
 
@@ -207,7 +208,7 @@ class Record(Iterator):
         return [f for f in self.fields if f.tag in args]
 
     def decode_marc(self, marc, to_unicode=True, force_utf8=False,
-        hide_utf8_warnings=False, utf8_handling='strict'):
+        hide_utf8_warnings=False, utf8_handling='strict', ascii_handling='strict'):
         """
         decode_marc() accepts a MARC record in transmission format as a
         a string argument, and will populate the object based on the data
@@ -216,7 +217,7 @@ class Record(Iterator):
 
         """
         # extract record leader
-        self.leader = marc[0:LEADER_LEN].decode('ascii')
+        self.leader = marc[0:LEADER_LEN].decode('ascii', ascii_handling)
         if len(self.leader) != LEADER_LEN:
             raise RecordLeaderInvalid
 
@@ -234,7 +235,7 @@ class Record(Iterator):
 
         # extract directory, base_address-1 is used since the
         # director ends with an END_OF_FIELD byte
-        directory = marc[LEADER_LEN:base_address-1].decode('ascii')
+        directory = marc[LEADER_LEN:base_address-1].decode('ascii', ascii_handling)
 
         # determine the number of fields in record
         if len(directory) % DIRECTORY_ENTRY_LEN != 0:
@@ -273,7 +274,7 @@ class Record(Iterator):
                 # blank spaces, and any more than 2 are dropped on the floor.
 
                 first_indicator = second_indicator = ' '
-                subs[0] = subs[0].decode('ascii')
+                subs[0] = subs[0].decode('ascii', ascii_handling)
                 if len(subs[0]) == 0:
                     logging.warning("missing indicators: %s", entry_data)
                     first_indicator = second_indicator = ' '
@@ -292,7 +293,7 @@ class Record(Iterator):
                 for subfield in subs[1:]:
                     if len(subfield) == 0:
                         continue
-                    code = subfield[0:1].decode('ascii')
+                    code = subfield[0:1].decode('ascii', ascii_handling)
                     data = subfield[1:]
 
                     if to_unicode:
