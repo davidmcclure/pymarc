@@ -101,8 +101,7 @@ class MARCReader(Reader):
                             ascii_handling=self.ascii_handling)
             return record
 
-        except:
-            continue
+        except: pass
 
 def map_records(f, *files):
     """
